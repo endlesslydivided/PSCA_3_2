@@ -15,10 +15,6 @@ client.on('error', err => {
     console.log('error: ' + err);
 });
 
-client.on('error', err => 
-{
-    console.log('error: ' + err);
-});
 
 client.on('connect',()=>
 {

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pulpits</title>
+    <style>
+        body {
+            background: lightgreen;
+        }
+
+        .btn {
+            width: 80px;
+            height: 30px;
+            margin: 0 50px;
+            background: cadetblue;
+            font-size: larger;
+        }
+
+        .article {
+            float: left;
+            margin: 0 25px;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .table {
+            margin: 50px 500px;
+            font-size: 20px;
+        }
+
+        th, td {
+            border: 1px solid darkcyan;
+        }
+    </style>
+</head>
+<body onload="getPulpits()">
+<article class="article">
+    <h1 id="error" style="color: red"></h1>
+    <section>
+        <h3 class="header">Get all pulpits</h3>
+        <input type="button" onclick="getPulpits()" value="✔" class="btn">
+    </section>
+    <section>
+        <h3 class="header">Add pulpit</h3>
+        <input type="text" id="post_pulpit" placeholder="pulpit"><br/>
+        <input type="text" id="post_pulpit_name" placeholder="pulpit name"><br/>
+        <input type="text" id="post_faculty" placeholder="faculty"><br/>
+        <input type="button" onclick="postPulpits()" value="✚" class="btn">
+    </section>
+    <section>
+        <h3 class="header">Update pulpit</h3>
+        <input type="text" id="put_pulpit" placeholder="pulpit"><br/>
+        <input type="text" id="put_pulpit_name" placeholder="pulpit name"><br/>
+        <input type="button" onclick="putPulpits()" value="✎" class="btn">
+    </section>
+    <section>
+        <h3 class="header">Delete pulpit</h3>
+        <input type="text" id="delete_pulpit" placeholder="pulpit"><br/>
+        <input type="button" onclick="deletePulpit()" value="✖" class="btn">
+    </section>
+</article>
+
+<article>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Специальность</th>
+            <th>Название специальности</th>
+            <th>Факультет</th>
+        </tr>
+        </thead>
+        <tbody id="table"></tbody>
+    </table>
+</article>
+<script>
+    function getPulpits() {
+        fetch('http://localhost:3000/api/pulpits', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json; charset=utf-8'}
+        })
+            .then(async response => {
+                return response.json();
+            })
+            .then(data => {
+                let tableBody = document.getElementById("table");
+                tableBody.innerHTML = '';
+                data.forEach(element => {
+                    let tr = tableBody.insertRow();
+                    let td = tr.insertCell();
+                    td.appendChild(document.createTextNode(element.pulpit));
+                    td = tr.insertCell();
+                    td.appendChild(document.createTextNode(element.pulpit_name));
+                    td = tr.insertCell();
+                    td.appendChild(document.createTextNode(element.faculty));
+                    tableBody.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                document.getElementById('error').innerText += err.statusText;
+            });
+    }
+
+    function postPulpits() {
+        document.getElementById('error').innerText = '';
+        let pulpit = document.getElementById('post_pulpit').value;
+        let pulpit_name = document.getElementById('post_pulpit_name').value;
+        let faculty = document.getElementById('post_faculty').value;
+
+        if (pulpit && pulpit_name && faculty) {
+            fetch(`http://localhost:3000/api/pulpits`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json; charset=utf-8'},
+                body: JSON.stringify({
+                        pulpit: pulpit,
+                        pulpit_name: pulpit_name,
+                        faculty: faculty
+                    }
+                )
+            })
+                .then(res => res.ok ? res : Promise.reject(res))
+                .then(response => {
+                    return response.json();
+                })
+                .catch(err => {
+                    console.log(err);
+                    document.getElementById('error').innerText += err.statusText;
+                })
+                .then(() => {
+                    getPulpits();
+                });
+        } else {
+            document.getElementById('error').innerText += 'Ошибка: введите все данные!';
+        }
+    }
+
+    function putPulpits() {
+        document.getElementById('error').innerText = '';
+        let pulpit = document.getElementById('put_pulpit').value;
+        let pulpit_name = document.getElementById('put_pulpit_name').value;
+
+        if (pulpit && pulpit_name) {
+            fetch(`http://localhost:3000/api/pulpits`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json; charset=utf-8'},
+                body: JSON.stringify({
+                        pulpit: pulpit,
+                        pulpit_name: pulpit_name
+                    }
+                )
+            })
+                .then(res => res.ok ? res : Promise.reject(res))
+                .then(response => {
+                    return response.json();
+                })
+                .catch(err => {
+                    console.log(err);
+                    document.getElementById('error').innerText += err;
+                })
+                .then(() => {
+                    getPulpits();
+                });
+        } else {
+            document.getElementById('error').innerText += 'Ошибка: введите все данные!';
+        }
+    }
+
+    function deletePulpit() {
+        document.getElementById('error').innerText = '';
+        let pulpit = document.getElementById('delete_pulpit').value;
+
+        if (pulpit) {
+            fetch(`http://localhost:3000/api/pulpits/${pulpit}`, {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json; charset=utf-8'}
+            })
+                .then(res => res.ok ? res : Promise.reject(res))
+                .then(response => {
+                    return response.json();
+                })
+                .catch(err => {
+                    console.log(err);
+                    document.getElementById('error').innerText += err.statusText;
+                })
+                .then(() => {
+                    getPulpits();
+                });
+        } else {
+            document.getElementById('error').innerText += 'Ошибка: введите все данные!';
+        }
+    }
+</script>
+</body>
+</html>

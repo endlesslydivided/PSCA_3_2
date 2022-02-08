@@ -7,13 +7,6 @@ let config = {
   }
 const client = redis.createClient(config);
 
-client.on('ready', () => {
-    client.set('incr', 0);
-});
-
-client.on('error', err => {
-    console.log('error: ' + err);
-});
 
 client.on('error', err => 
 {
@@ -37,9 +30,9 @@ client.on('message', (channel, message) => {
     console.log('sub channel: ' + channel + ': ' + message);
 });
 
-client.subscribe('channel-01');
+client.subscribe('one');
 
 setTimeout(() => {
     client.unsubscribe();
     client.quit();
-}, 60000);
+}, 30000);

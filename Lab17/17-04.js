@@ -11,13 +11,6 @@ const count = 10000;
 hset(client, count);
 hget(client, count);
 
-client.on('ready', () => {
-    client.set('incr', 0);
-});
-
-client.on('error', err => {
-    console.log('error: ' + err);
-});
 
 client.on('error', err => 
 {
@@ -38,19 +31,19 @@ client.quit();
 
 function hset(client, count) 
 {
-    console.time(`\t${count} hsets`);
+    console.time(`${count} hsets`);
     for (let n = 0; n < count; n++) 
     {
         client.hset(n, n, JSON.stringify({id: n, val: `value - ${n}`}));
     }
-    console.timeEnd(`\t${count} hsets`);
+    console.timeEnd(`${count} hsets`);
 }
 
 function hget(client, count) {
-    console.time(`\t${count} hgets`);
+    console.time(`${count} hgets`);
     for (let n = 0; n < count; n++) 
     {
         client.hget(n, n);
     }
-    console.timeEnd(`\t${count} hgets`);
+    console.timeEnd(`${count} hgets`);
 }

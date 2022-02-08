@@ -7,14 +7,6 @@ let config = {
   }
 const client = redis.createClient(config);
 
-client.on('ready', () => {
-    client.set('incr', 0);
-});
-
-client.on('error', err => {
-    console.log('error: ' + err);
-});
-
 client.on('error', err => 
 {
     console.log('error: ' + err);
@@ -30,27 +22,19 @@ client.on('end', () =>
     console.log('End');
 });
 
-client.publish('channel-01', 'message 1 from pub-client');
-client.publish('channel-01', 'message 2 from pub-client');
+client.publish('one', 'message 1');
+
+client.publish('two', 'message 2');
 
 setTimeout(() => 
 {
-    client.publish('channel-01', 'message 3 from pub-client');
+    client.publish('one', 'message 3 from pub-client');
+}, 5000);
+
+setTimeout(() => 
+{
+    client.publish('one', 'message 4 from pub-client');
 }, 10000);
 
-setTimeout(() => 
-{
-    client.publish('channel-01', 'message 4 from pub-client');
-}, 20000);
 
-setTimeout(() => 
-{
-    client.publish('channel-01', 'message 5 from pub-client');
-}, 30000);
-
-setTimeout(() => 
-{
-    client.publish('channel-01', 'message 6 from pub-client');
-}, 40000);
-
-setTimeout(() => client.quit(), 60000);
+setTimeout(() => client.quit(), 15000);
