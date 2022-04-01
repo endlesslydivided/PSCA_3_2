@@ -6,4 +6,4 @@ Debug
 Release
 .db
 v1
-/node_modules
+node_modules/
