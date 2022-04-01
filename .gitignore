@@ -5,4 +5,5 @@ ipch
 Debug
 Release
 .db
-v16
+v1
+/node_modules
