@@ -11,13 +11,13 @@ const servicetypeRouter = require('./Routers/servicetypeRouter');
 const orderRouter = require('./Routers/orderRouter');
 const cityRouter = require('./Routers/cityRouter');
 
-app.use(bodyParser.json({limit:'50mb',extended:true}));
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
 
-dbConnection.sync({force:false})
+dbConnection.sync()
     .then(()=>
     {
-        console.log('Application launched: http://localhost:' + port);
+        console.log('Приложение запущено: http://localhost:' + port);
         return app.listen(port);
     })
     .catch((error)=>

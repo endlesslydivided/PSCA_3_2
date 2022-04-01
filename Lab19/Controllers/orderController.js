@@ -1,3 +1,4 @@
+const { Sequelize } = require('sequelize');
 const model = require('../Models/models');
 const AppError = require('../Services/applicationError');
 const errorMessages = require('../Services/errorMessages');
@@ -15,6 +16,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -24,7 +26,7 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const order = await model.Orders.findByPk(request.params.id);
             response.type('json');
@@ -33,6 +35,8 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
+            
         }
     },
 
@@ -42,19 +46,20 @@ module.exports =
         {
             if (!request.body.CustomerName ||
                 !request.body.ServiceId ||
-                !request.body.UnitsAmount ||
-                !request.body.ArrivalPoint ||
+                !request.body.UnitsAmount||
+                !request.body.OrderDate ||
                 !request.body.OrderExec) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
+
             const order = await model.Orders.create(
                 {
                     CustomerName:request.body.CustomerName,
                     ServiceId:request.body.ServiceId,
-                    UnitsAmount:request.body.DepartuUnitsAmountrePoint,
-                    OrderDate:request.body.OrderDate,
-                    OrderExec:request.body.OrderExec
+                    UnitsAmount:request.body.UnitsAmount,
+                    OrderDate:(new Date(request.body.OrderDate)),
+                    OrderExec:(new Date(request.body.OrderExec))
                 }
             );
             response.type('json');
@@ -63,6 +68,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -72,35 +78,42 @@ module.exports =
         {
             if(!request.body.CustomerName ||
                 !request.body.ServiceId ||
-                !request.body.UnitsAmount ||
-                !request.body.ArrivalPoint ||
+                !request.body.UnitsAmount||
+                !request.body.OrderDate ||
                 !request.body.OrderExec)
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const order = await model.Orders.update(
-                {
-                    CustomerName:request.body.CustomerName,
-                    ServiceId:request.body.ServiceId,
-                    UnitsAmount:request.body.DepartuUnitsAmountrePoint,
-                    OrderDate:request.body.OrderDate,
-                    OrderExec:request.body.OrderExec
-                },
-                {where: {Id: request.params.id}}
-            );
-
-            if(order === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.ORDER_NOT_FOUND}));
+                const order = await model.Orders.update(
+                    {
+                        CustomerName:request.body.CustomerName,
+                        ServiceId:request.body.ServiceId,
+                        UnitsAmount:request.body.UnitsAmount,
+                        OrderDate:request.body.OrderDate,
+                        OrderExec:request.body.OrderExec
+                    },
+                    {where: {Id: request.params.id}}
+                );
+    
+                if(order == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.ORDER_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(model.Orders.findByPk(request.params.id)));
+                }
+                
             }
-
-            res.type('json');
-            res.end(JSON.stringify(order));
+           
         }
         catch (error) 
         {
-            console.error(error.message)
+            console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -110,20 +123,30 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
 
-            const order = await model.Orders.destroy({where:{Id: request.params.id}});
-            if(order === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.ORDER_NOT_FOUND}));
+                const obj = model.Orders.findByPk(request.params.id);
+                const order = await model.Orders.destroy({where:{Id: request.params.id}});
+                if(order == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.ORDER_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(obj));
+                }
+                
             }
-            res.type('json');
-            res.end(JSON.stringify(order));
+            
         } 
         catch (error) 
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     }
 }

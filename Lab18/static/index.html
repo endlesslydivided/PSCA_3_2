@@ -3,67 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Pulpits</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
     <style>
+        @font-face {
+        font-family: SamsungSharpSans; /* Имя шрифта */
+        src: url(fonts/SamsungSharpSans.ttf); /* Путь к файлу со шрифтом */
+        }
+
+        @font-face {
+        font-family: SamsungOne400; /* Имя шрифта */
+        src: url(fonts/SamsungOne400.ttf); /* Путь к файлу со шрифтом */
+        }
         body {
-            background: lightgreen;
+            background: white;
+            font-family: SamsungOne400;
         }
 
-        .btn {
-            width: 80px;
-            height: 30px;
-            margin: 0 50px;
-            background: cadetblue;
-            font-size: larger;
+        h5
+        {
+            font-family: SamsungSharpSans;
+
         }
 
-        .article {
-            float: left;
-            margin: 0 25px;
-        }
+        
 
-        .header {
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        .table {
-            margin: 50px 500px;
-            font-size: 20px;
-        }
-
-        th, td {
-            border: 1px solid darkcyan;
-        }
+    
     </style>
 </head>
-<body onload="getPulpits()">
-<article class="article">
-    <h1 id="error" style="color: red"></h1>
-    <section>
-        <h3 class="header">Get all pulpits</h3>
-        <input type="button" onclick="getPulpits()" value="✔" class="btn">
-    </section>
-    <section>
-        <h3 class="header">Add pulpit</h3>
-        <input type="text" id="post_pulpit" placeholder="pulpit"><br/>
-        <input type="text" id="post_pulpit_name" placeholder="pulpit name"><br/>
-        <input type="text" id="post_faculty" placeholder="faculty"><br/>
-        <input type="button" onclick="postPulpits()" value="✚" class="btn">
-    </section>
-    <section>
-        <h3 class="header">Update pulpit</h3>
-        <input type="text" id="put_pulpit" placeholder="pulpit"><br/>
-        <input type="text" id="put_pulpit_name" placeholder="pulpit name"><br/>
-        <input type="button" onclick="putPulpits()" value="✎" class="btn">
-    </section>
-    <section>
-        <h3 class="header">Delete pulpit</h3>
-        <input type="text" id="delete_pulpit" placeholder="pulpit"><br/>
-        <input type="button" onclick="deletePulpit()" value="✖" class="btn">
-    </section>
-</article>
+<body >
+    <h5 id="error" style="color: red" class="m-2"></h5>
+    <section class="container-fluid m-0">
+        <div class="row m-0">
+            <div class="col-md-3 m-0 text-center">
+                <h5 class="">Получить все кафедры</h5>
+                <input type="button" onclick="getPulpits()" value="GET" class="btn border-dark rounded-0 my-1">
+            </div>
 
-<article>
+            <div class="col-md-3 m-0 text-center">
+                <h5 class="">Добавить кафедру</h5>
+                <input type="text" id="postPulpit" class="my-1" placeholder="pulpit"><br/>
+                <input type="text" id="postPulpitName" class="my-1" placeholder="pulpit name"><br/>
+                <input type="text" id="postFaculty" class="my-1" placeholder="faculty"><br/>
+                <input type="button" onclick="postPulpits()" value="POST" class="btn border-dark rounded-0 my-1">
+            </div>
+
+            <div class="col-md-3 m-0 text-center">
+                <h5 class="">Обновить кафедру</h5>
+                <input type="text" id="putPulpit" class="my-1" placeholder="pulpit"><br/>
+                <input type="text" id="put_pulpit_name" class="my-1" placeholder="pulpit name"><br/>
+                <input type="button" onclick="putPulpits()" value="PUT" class="btn border-dark rounded-0 my-1">
+            </div>
+    
+            <div class="col-md-3 m-0 text-center">
+                <h5 class="">Удалить кафедру</h5>
+                <input type="text" id="deletePulpit" class="my-1" placeholder="pulpit"><br/>
+                <input type="button" onclick="deletePulpit()" value="DELETE" class="btn border-dark rounded-0 my-1">
+            </div>
+
+        </div>
+    </section>
+<section class="m-5 p-5">
     <table class="table">
         <thead>
         <tr>
@@ -74,28 +74,30 @@
         </thead>
         <tbody id="table"></tbody>
     </table>
-</article>
+</section>
 <script>
     function getPulpits() {
-        fetch('http://localhost:3000/api/pulpits', {
+        fetch('http://localhost:3000/api/pulpits', 
+        {
             method: 'GET',
             headers: {'Content-Type': 'application/json; charset=utf-8'}
         })
-            .then(async response => {
+            .then(async response => 
+            {
                 return response.json();
             })
-            .then(data => {
-                let tableBody = document.getElementById("table");
-                tableBody.innerHTML = '';
+            .then(data => 
+            {
+                let body = document.getElementById("table");
+                body.innerHTML = '';
                 data.forEach(element => {
-                    let tr = tableBody.insertRow();
-                    let td = tr.insertCell();
-                    td.appendChild(document.createTextNode(element.pulpit));
-                    td = tr.insertCell();
-                    td.appendChild(document.createTextNode(element.pulpit_name));
-                    td = tr.insertCell();
-                    td.appendChild(document.createTextNode(element.faculty));
-                    tableBody.appendChild(tr);
+                    body.innerHTML += 
+                    `<tr>
+                        <td>${element.pulpit}</td>
+                        <td>${element.pulpit_name}</td>
+                        <td>${element.faculty}</td>
+                    </tr>`
+                   
                 });
             })
             .catch(err => {
@@ -105,17 +107,17 @@
 
     function postPulpits() {
         document.getElementById('error').innerText = '';
-        let pulpit = document.getElementById('post_pulpit').value;
-        let pulpit_name = document.getElementById('post_pulpit_name').value;
-        let faculty = document.getElementById('post_faculty').value;
+        let pulpit = document.getElementById('postPulpit').value;
+        let pulpitName = document.getElementById('postPulpitName').value;
+        let faculty = document.getElementById('postFaculty').value;
 
-        if (pulpit && pulpit_name && faculty) {
+        if (pulpit && pulpitName && faculty) {
             fetch(`http://localhost:3000/api/pulpits`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json; charset=utf-8'},
                 body: JSON.stringify({
                         pulpit: pulpit,
-                        pulpit_name: pulpit_name,
+                        pulpit_name: pulpitName,
                         faculty: faculty
                     }
                 )
@@ -132,44 +134,47 @@
                     getPulpits();
                 });
         } else {
-            document.getElementById('error').innerText += 'Ошибка: введите все данные!';
+            document.getElementById('error').innerText += 'Заполнены не все поля!';
         }
     }
 
     function putPulpits() {
         document.getElementById('error').innerText = '';
-        let pulpit = document.getElementById('put_pulpit').value;
-        let pulpit_name = document.getElementById('put_pulpit_name').value;
+        let pulpit = document.getElementById('putPulpit').value;
+        let pulpitName = document.getElementById('put_pulpit_name').value;
 
-        if (pulpit && pulpit_name) {
+        if (pulpit && pulpitName) {
             fetch(`http://localhost:3000/api/pulpits`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json; charset=utf-8'},
                 body: JSON.stringify({
                         pulpit: pulpit,
-                        pulpit_name: pulpit_name
+                        pulpit_name: pulpitName
                     }
                 )
             })
                 .then(res => res.ok ? res : Promise.reject(res))
-                .then(response => {
+                .then(response => 
+                {
                     return response.json();
                 })
-                .catch(err => {
+                .catch(err => 
+                {
                     console.log(err);
                     document.getElementById('error').innerText += err;
                 })
-                .then(() => {
+                .then(() => 
+                {
                     getPulpits();
                 });
         } else {
-            document.getElementById('error').innerText += 'Ошибка: введите все данные!';
+            document.getElementById('error').innerText += 'Заполните все поля!';
         }
     }
 
     function deletePulpit() {
         document.getElementById('error').innerText = '';
-        let pulpit = document.getElementById('delete_pulpit').value;
+        let pulpit = document.getElementById('deletePulpit').value;
 
         if (pulpit) {
             fetch(`http://localhost:3000/api/pulpits/${pulpit}`, {
@@ -177,18 +182,21 @@
                 headers: {'Content-Type': 'application/json; charset=utf-8'}
             })
                 .then(res => res.ok ? res : Promise.reject(res))
-                .then(response => {
+                .then(response => 
+                {
                     return response.json();
                 })
-                .catch(err => {
+                .catch(err => 
+                {
                     console.log(err);
                     document.getElementById('error').innerText += err.statusText;
                 })
-                .then(() => {
+                .then(() => 
+                {
                     getPulpits();
                 });
         } else {
-            document.getElementById('error').innerText += 'Ошибка: введите все данные!';
+            document.getElementById('error').innerText += 'Заполните все поля!';
         }
     }
 </script>

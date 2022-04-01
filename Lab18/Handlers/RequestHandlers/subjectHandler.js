@@ -27,7 +27,7 @@ function updateSubject(request, response, body)
         } 
         else 
         {
-            response.end(JSON.stringify(result))
+            response.end(JSON.stringify(body))
         }
     })
     .catch(error => errorHandler(response, 500, error.message));
@@ -86,19 +86,27 @@ module.exports = function (request, response)
         }
         case "DELETE": 
         {
-            Subject.destroy({where: {subject: request.url.split('/')[3]}})
+
+            Subject.findByPk(request.url.split('/')[3])
                 .then(result => 
                 {
-                    if (result == 0) 
+                    Subject.destroy({where: {subject: request.url.split('/')[3]}})
+                    .then(resultD => 
                     {
-                        throw new Error('Subject not found')
-                    } 
-                    else 
-                    {
-                        response.end(JSON.stringify(result))
-                    }
+                        if (resultD == 0) 
+                        {
+                            throw new Error('Subject not found')
+                        } 
+                        else 
+                        {
+                            response.end(JSON.stringify(result))
+                        }
+                    })
+                    .catch(error => errorHandler(response, 500, error.message));
                 })
-            .catch(error => errorHandler(response, 500, error.message));
+                .catch(error => errorHandler(response, 500, error.message));
+
+                break;
         }
         default:
         {

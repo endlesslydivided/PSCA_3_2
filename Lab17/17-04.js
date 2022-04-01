@@ -8,8 +8,24 @@ let config = {
 const client = redis.createClient(config);
 const count = 10000;
 
-hset(client, count);
-hget(client, count);
+
+
+let t = setInterval(() => {
+    if(client.connected)
+    {
+        clearInterval(t);
+        console.time(`${count} hsets`);
+        hset(client, count);
+        console.timeEnd(`${count} hsets`);
+ 
+        console.time(`${count} hgets`);
+        hget(client, count);
+        console.timeEnd(`${count} hgets`);
+
+        client.quit();
+    
+    }
+}, 0);
 
 
 client.on('error', err => 
@@ -27,23 +43,18 @@ client.on('end', () =>
     console.log('End');
 });
 
-client.quit();
 
 function hset(client, count) 
 {
-    console.time(`${count} hsets`);
     for (let n = 0; n < count; n++) 
     {
         client.hset(n, n, JSON.stringify({id: n, val: `value - ${n}`}));
     }
-    console.timeEnd(`${count} hsets`);
 }
 
 function hget(client, count) {
-    console.time(`${count} hgets`);
     for (let n = 0; n < count; n++) 
     {
         client.hget(n, n);
     }
-    console.timeEnd(`${count} hgets`);
 }

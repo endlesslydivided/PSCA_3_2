@@ -15,7 +15,7 @@ module.exports = function (sequelize, DataTypes) {
         },
         UnitsAmount: {
             type: DataTypes.DECIMAL(6,1),
-                allowNull: false
+                allowNull: false,
         },
         OrderDate: {
             type: DataTypes.DATE,

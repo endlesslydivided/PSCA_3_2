@@ -56,18 +56,25 @@ module.exports = function (request, response) {
 
         case "DELETE": 
         {
-            Auditorium_type.destroy({where: {auditorium_type: request.url.split('/')[3]}})
-            .then(result => {
-                if (result == 0) 
+            Auditorium_type.findByPk(request.url.split('/')[3])
+            .then(result => 
                 {
-                    throw new Error('AuditoriumType not found')
-                } 
-                else 
-                {
-                    response.end(JSON.stringify(result))
-                }
+                    Auditorium_type.destroy({where: {auditorium_type: request.url.split('/')[3]}})
+                    .then(resultD => {
+                        if (resultD == 0) 
+                        {
+                            throw new Error('AuditoriumType not found')
+                        } 
+                        else 
+                        {
+                            response.end(JSON.stringify(result))
+                        }
+                    })
+                    .catch(error => errorHandler(response, 500, error.message));
             })
             .catch(error => errorHandler(response, 500, error.message));
+
+            
 
             break;
         }
@@ -103,7 +110,7 @@ function updateAuditoriumtype(request, response, body)
             throw new Error('AuditoriumType not found')
         } 
         else {
-            response.end(JSON.stringify(result))
+            response.end(JSON.stringify(body))
         }
     })
     .catch(error => errorHandler(response, 500, error.message));

@@ -6,6 +6,6 @@ serviceRouter.get("/all",serviceController.getServices);
 serviceRouter.get("/:id",serviceController.getService);
 serviceRouter.post("/add",serviceController.addService);
 serviceRouter.put("/update/:id",serviceController.updateService);
-serviceRouter.get("/delete/:id",serviceController.deleteService);
+serviceRouter.delete("/delete/:id",serviceController.deleteService);
 
 module.exports = serviceRouter;

@@ -26,10 +26,18 @@ client.on('end', () =>
     console.log('End');
 });
 
-incrQueries(client);
-decrQueries(client);
+let t = setInterval(() => {
+    if(client.connected)
+    {
+        clearInterval(t);
+        incrQueries(client);
+        decrQueries(client);
 
-client.quit();
+        client.quit();
+    
+    }
+}, 0);
+
 
 function incrQueries(client, ) {
     console.time(`10000 incr`);

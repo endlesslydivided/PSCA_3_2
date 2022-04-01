@@ -15,6 +15,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -24,7 +25,7 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const serviceType = await model.ServiceTypes.findByPk(request.params.id);
             response.type('json');
@@ -33,6 +34,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -43,7 +45,7 @@ module.exports =
             if (!request.body.ServiceName ||
                 !request.body.UnitType) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const serviceType = await model.ServiceTypes.create(
                 {
@@ -57,6 +59,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -67,29 +70,34 @@ module.exports =
             if(!request.body.ServiceName ||
                 !request.body.UnitType)
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const serviceType = await model.ServiceTypes.update(
-                {
-                    ServiceName:request.body.ServiceName,
-                    UnitType:request.body.UnitType
-                },
-                {where: {Id: request.params.id}}
-            );
-
-            if(serviceType === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.SERVICETYPE_NOT_FOUND}));
+                const serviceType = await model.ServiceTypes.update(
+                    {
+                        ServiceName:request.body.ServiceName,
+                        UnitType:request.body.UnitType
+                    },
+                    {where: {Id: request.params.id}}
+                );
+    
+                if(serviceType == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.SERVICETYPE_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(model.ServiceTypes.findByPk(request.params.id)));
+                }           
             }
-
-            res.type('json');
-            res.end(JSON.stringify(serviceType));
+           
         }
         catch (error) 
         {
-            console.error(error.message)
-        }
+            console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));        }
     },
 
     deleteServiceType: async (request,response) =>
@@ -98,20 +106,29 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const serviceType = await model.ServiceTypes.destroy({where:{Id: request.params.id}});
-            if(serviceType === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.SERVICETYPE_NOT_FOUND}));
+                const obj = model.ServiceTypes.findByPk(request.params.id);
+                const serviceType = await model.ServiceTypes.destroy({where:{Id: request.params.id}});
+                if(serviceType == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.SERVICETYPE_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(obj));
+                }
+                
             }
-            res.type('json');
-            res.end(JSON.stringify(serviceType));
+            
         } 
         catch (error) 
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     }
 }

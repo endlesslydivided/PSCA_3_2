@@ -15,6 +15,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -24,7 +25,7 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const route = await model.Routes.findByPk(request.params.id);
             response.type('json');
@@ -33,6 +34,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -45,11 +47,11 @@ module.exports =
                 !request.body.DeparturePoint ||
                 !request.body.ArrivalPoint) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const route = await model.Routes.create(
                 {
-                    RouteName:request.body.CustomerName,
+                    RouteName:request.body.RouteName,
                     Distance:request.body.Distance,
                     DeparturePoint:request.body.DeparturePoint,
                     ArrivalPoint:request.body.ArrivalPoint
@@ -61,6 +63,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -73,31 +76,37 @@ module.exports =
                 !request.body.DeparturePoint ||
                 !request.body.ArrivalPoint)
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const route = await model.Routes.update(
-                {
-                    RouteName:request.body.CustomerName,
-                    Distance:request.body.Distance,
-                    DeparturePoint:request.body.DeparturePoint,
-                    ArrivalPoint:request.body.ArrivalPoint
-                },
-                {where: {Id: request.params.id}}
-            );
-
-            if(route === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.ROUTE_NOT_FOUND}));
+                const route = await model.Routes.update(
+                    {
+                        RouteName:request.body.RouteName,
+                        Distance:request.body.Distance,
+                        DeparturePoint:request.body.DeparturePoint,
+                        ArrivalPoint:request.body.ArrivalPoint
+                    },
+                    {where: {Id: request.params.id}}
+                );
+    
+                if(route == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.ROUTE_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(model.Routes.findByPk(request.params.id)));
+                }
+               
             }
-
-            res.type('json');
-            res.end(JSON.stringify(route));
+           
         }
         catch (error) 
         {
-            console.error(error.message)
-        }
+            console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));        }
     },
 
     deleteRoute: async (request,response) =>
@@ -106,20 +115,28 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const route = await model.Routes.destroy({where:{Id: request.params.id}});
-            if(route === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.ROUTE_NOT_FOUND}));
+                const obj = model.Routes.findByPk(request.params.id);
+                const route = await model.Routes.destroy({where:{Id: request.params.id}});
+                if(route == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.ROUTE_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(obj));
+                }      
             }
-            res.type('json');
-            res.end(JSON.stringify(route));
+           
         } 
         catch (error) 
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     }
 }

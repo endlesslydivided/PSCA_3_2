@@ -1,6 +1,8 @@
 const dbConnection = require('../../DB');
 const errorHandler = require('../RequestHandlers/errorHandler');
 const {Faculty} = require('../../Models/model').ORM(dbConnection);
+const {Pulpit} = require('../../Models/model').ORM(dbConnection);
+const {Teacher} = require('../../Models/model').ORM(dbConnection);
 
 function addFaculty(request, response, body) 
 {
@@ -21,11 +23,11 @@ function updateFaculty(request, response, body)
         {
         if (result == 0) 
         {
-            throw new Error("Faculty not found!")
+            throw new Error("Faculty not found")
         } 
         else 
         {
-            response.end(JSON.stringify(result))
+            response.end(JSON.stringify(body))
         }
         }).catch(error => errorHandler(response, 500, error.message));
 }
@@ -37,12 +39,56 @@ module.exports = function (request, response) {
     switch (request.method) {
         case "GET": 
         {
-            const path = request.url;        
+            const path = request.url;      
+            if (/\/api\/faculties\/.*\/pulpits/.test(path)) 
+            {
+                Faculty.findAll
+                ({
+                    include: [{model: Pulpit, as: 'faculty_pulpits', required: true}],
+                    where: {faculty: decodeURI(path.split('/')[3])}
+                }).then(result => 
+                    {
+                        if (result == 0) 
+                        {
+                            throw new Error('Pulpits not found')
+                        } else 
+                        {
+                            response.end(JSON.stringify(result))
+                        }
+                    })
+                    .catch(err => errorHandler(response, 500, err.message));
+            } else if (/\/api\/faculties\/.*\/teachers/.test(path)) 
+            {
+                Faculty.findAll(
+                    {
+                    include: [
+                        {
+                            model: Pulpit, as: 'faculty_pulpits', required: true,
+                            include: [{model: Teacher, as: 'pulpit_teachers', required: true}]
+                        }
+                    ],
+                    where: {faculty: decodeURI(path.split('/')[3])}
+                })
+                    .then(result => 
+                        {
+                        if (result == 0) 
+                        {
+                            throw new Error('Teachers not found')
+                        } else 
+                        {
+                            response.end(JSON.stringify(result))
+                        }
+                    })
+                    .catch(err => errorHandler(response, 500, err.message));
+                }
+            else
+            {  
             Faculty.findAll()
                 .then(result => 
                 {
                     response.end(JSON.stringify(result));
                 }).catch(error => errorHandler(response, 500, error.message));
+            }
             break;
         }
            
@@ -80,20 +126,27 @@ module.exports = function (request, response) {
             break;
 
         }
-        case "DELETE": {
-            Faculty.destroy({where: {faculty: request.url.split('/')[3]}})
+        case "DELETE": 
+        {
+            Faculty.findByPk(request.url.split('/')[3])
                 .then(result => 
-                    {
-                    if (result == 0) 
-                    {
-                        throw new notFoundError('Faculty not define')
-                    } 
-                    else 
-                    {
-                        response.end(JSON.stringify(result))
-                    }
-                })
-                .catch(error => errorHandler(response, 500, error.message));
+                {
+                    Faculty.destroy({where: {faculty: request.url.split('/')[3]}})
+                    .then(resultD => 
+                        {
+                        if (resultD == 0) 
+                        {
+                            throw new Error('Faculty not found')
+                        } 
+                        else 
+                        {
+                            response.end(JSON.stringify(result))
+                        }
+                    })
+                    .catch(error => errorHandler(response, 500, error.message));
+                }).catch(error => errorHandler(response, 500, error.message));
+
+           
 
             break;
         }

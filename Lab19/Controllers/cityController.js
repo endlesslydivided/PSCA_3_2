@@ -15,6 +15,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -24,7 +25,7 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const city = await model.Cities.findByPk(request.params.id);
             response.type('json');
@@ -33,6 +34,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -42,19 +44,25 @@ module.exports =
         {
             if (!request.body.CityName) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-            const city = await model.Cities.create(
-                {
-                    CityName:request.body.CityName
-                }
-            );
-            response.type('json');
-            response.end(JSON.stringify(city));
+            else
+            {
+                const city = await model.Cities.create(
+                    {
+                        CityName:request.body.CityName
+                    }
+                );
+                
+                response.type('json');
+                response.end(JSON.stringify(city));
+            }
+           
         }
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -64,27 +72,34 @@ module.exports =
         {
             if(!request.body.CityName)
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const city = await model.Cities.update(
-                {
-                    CityName:request.body.CityName
-                },
-                {where: {Id: request.params.id}}
-            );
-
-            if(city === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.CITY_NOT_FOUND}));
+                const city = await model.Cities.update(
+                    {
+                        CityName:request.body.CityName
+                    },
+                    {where: {Id: request.params.id}}
+                );
+    
+                if(city == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.CITY_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify( model.Cities.findByPk(request.params.id)));
+                }
+                
             }
-
-            res.type('json');
-            res.end(JSON.stringify(city));
+            
         }
         catch (error) 
         {
-            console.error(error.message)
+            console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -94,20 +109,28 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const city = await model.Cities.destroy({where:{Id: request.params.id}});
-            if(city === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.CITY_NOT_FOUND}));
+                const obj =  model.Cities.findByPk(request.params.id);
+                const city = await model.Cities.destroy({where:{Id: request.params.id}});
+                if(city == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.CITY_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(obj));
+                }
+                
             }
-            res.type('json');
-            res.end(JSON.stringify(city));
+           
         } 
         catch (error) 
         {
-            console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     }
 }

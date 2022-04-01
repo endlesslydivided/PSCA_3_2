@@ -1,0 +1,3 @@
+openssl genrsa -des3 -out CA.key 2048
+openssl req -x509 -new -key CA.key -days 700 -sha256 -out CA.crt
+openssl req -new -key LAB.key -out LAB.csr -sha256 -config LAB.cfg

@@ -15,6 +15,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -24,7 +25,7 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const customer = await model.Customers.findByPk(request.params.id);
             response.type('json');
@@ -33,6 +34,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     },
 
@@ -40,13 +42,13 @@ module.exports =
     {
         try
         {
-            if (!request.params.CustomerName) 
+            if (!request.body.CustomerName) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
             const customer = await model.Customers.create(
                 {
-                    CustomerName:request.params.CustomerName
+                    CustomerName:request.body.CustomerName
                 }
             );
             response.type('json');
@@ -55,6 +57,7 @@ module.exports =
         catch (error)
         {
             console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message})); 
         }
     },
 
@@ -64,27 +67,33 @@ module.exports =
         {
             if(!request.body.CustomerName)
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const customer = await model.Customers.update(
-                {
-                   CustomerName:request.body.CustomerName 
-                },
-                {where: {Id: request.params.id}}
-            );
-
-            if(customer === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.CUSTOMER_NOT_FOUND}));
+                const customer = await model.Customers.update(
+                    {
+                       CustomerName:request.body.CustomerName 
+                    },
+                    {where: {Id: request.params.id}}
+                );
+    
+                if(customer == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.CUSTOMER_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(model.Customers.findByPk(request.params.id)));
+                }
             }
-
-            res.type('json');
-            res.end(JSON.stringify(customer));
+            
         }
         catch (error) 
         {
-            console.error(error.message)
+            console.error(error.message);
+            response.status(500).json(new AppError({status: 505, message: error.message}));
         }
     },
 
@@ -94,20 +103,29 @@ module.exports =
         {
             if (!request.params.id) 
             {
-                res.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
+                response.status(400).json(new AppError({status: 400, message: errorMessages.BAD_DATA}));
             }
-
-            const customer = await model.Customers.destroy({where:{Id: request.params.id}});
-            if(customer === 0)
+            else
             {
-                res.status(404).json(new AppError({status: 404, message: errorMessages.CUSTOMER_NOT_FOUND}));
+                const obj = model.Customers.findByPk(request.params.id);
+                const customer = await model.Customers.destroy({where:{Id: request.params.id}});
+                if(customer == 0)
+                {
+                    response.status(404).json(new AppError({status: 404, message: errorMessages.CUSTOMER_NOT_FOUND}));
+                }
+                else
+                {
+                    response.type('json');
+                    response.end(JSON.stringify(obj));
+                }
+           
             }
-            res.type('json');
-            res.end(JSON.stringify(customer));
+            
         } 
         catch (error) 
         {
             console.error(error.message);
+response.status(500).json(new AppError({status: 505, message: error.message}));;
         }
     }
 }

@@ -1,6 +1,7 @@
 const dbConnection = require('../../DB');
 const {Auditorium} = require('../../Models/model').ORM(dbConnection);
 const errorHandler = require('../../Handlers/RequestHandlers/errorHandler');
+const Sequelize = require('sequelize');
 
 function addAuditorium(request, reponse, body) 
 {
@@ -27,7 +28,7 @@ function updateAuditorium(request, reponse, body)
         } 
         else 
         {
-            reponse.end(JSON.stringify(result))
+            reponse.end(JSON.stringify(body))
         }
         })
         .catch((error) => errorHandler(reponse, 500, error.message));
@@ -41,10 +42,55 @@ module.exports = function(request,response)
     {
         case "GET":
         {
-            Auditorium.findAll().then((result) => {
-                res.end(JSON.stringify(result));
-            })
-            .catch(error => errorHandler(response, 500, error.message)); 
+            const path = request.url;      
+
+            if (/api\/auditoriumsgt60/.test(path)) 
+            {
+                let auditoriums = Auditorium.scope('auditoriumsgt60').findAll();
+                auditoriums
+                    .then(result => {
+                        response.end(JSON.stringify(result));
+                    })
+                    .catch(err => errorHandler(response, 500, err.message));
+            } 
+            else if (/api\/auditoriumstransaction/.test(path)) 
+            {
+                return dbConnection.transaction({isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.READ_COMMITTED})
+                    .then(t => 
+                        {
+                        return Auditorium.findAll().then(auditoriums => 
+                            {
+                            auditoriums.forEach(auditorium => 
+                                {
+                                    return auditorium.update({auditorium_capacity : 90});                 
+                                })
+                        }, {transaction: t})
+                            .then(result => 
+                            {
+                                Auditorium.findAll().then((res) => 
+                                {
+                                    response.end(JSON.stringify(res));
+                                })
+                            })
+                            .then(() => 
+                            {
+                                setTimeout( () =>  t.rollback(), 3000);
+                            })
+                            .catch( err =>
+                            {
+                                console.error('Rollback', err.message);
+                                 t.rollback();
+                            });
+                    })
+            } 
+            else 
+            {
+                Auditorium.findAll().then((result) => 
+                {
+                    response.end(JSON.stringify(result));
+                })
+                .catch(error => errorHandler(response, 500, error.message)); 
+            }
             break;
         }
         case "POST":
@@ -82,17 +128,22 @@ module.exports = function(request,response)
         }
         case "DELETE":
         {
-            Auditorium.destroy({where: {auditorium: req.url.split('/')[3]}}).then((result) => 
-            {
-                if (result == 0) 
+            Auditorium.findByPk(request.url.split('/')[3])
+            .then((result) => {
+                Auditorium.destroy({where: {auditorium: request.url.split('/')[3]}}).then((resultD) => 
                 {
-                    throw new Error('Auditorium not found')
-                } 
-                else 
-                {
-                    res.end(JSON.stringify(result))
-                }
-                }).catch(err => errorHandler(response, 500, error.message));
+                    if (resultD == 0) 
+                    {
+                        throw new Error('Auditorium not found')
+                    } 
+                    else 
+                    {
+                        response.end(JSON.stringify(result))
+                    }
+                    }).catch(error => errorHandler(response, 500, error.message));
+            })
+            .catch(error => errorHandler(response, 500, error.message)); 
+           break;
         }
     }
 }

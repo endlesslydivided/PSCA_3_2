@@ -13,7 +13,7 @@ module.exports = (request,response) =>
 
     switch(true)
     {
-        case path === '/':
+        case (path === '/' || (/\/fonts\/([a-z]|[A-Z]|[0-9])+\.ttf/).test(path)):
         {
             getHandler(request,response); break;
         }
@@ -26,15 +26,15 @@ module.exports = (request,response) =>
             pulpitHandler(request, response);break;
         }
 
-        case (/\/api\/subject/).test(path):
+        case (/\/api\/subjects/).test(path):
         {
             subjectHandler(request, response);break;
         }
-        case (/\/api\/auditorium/).test(path):
+        case (/\/api\/auditoriums/).test(path):
         {
             auditoriumHandler(request, response);break;
         }   
-        case (/\/api\/auditoriumtype/).test(path):
+        case (/\/api\/auditoriumtypes/).test(path):
         {
             auditoriumtypeHandler(request, response);break;          
         }

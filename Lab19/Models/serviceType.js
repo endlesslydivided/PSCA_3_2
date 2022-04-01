@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    return sequelize.define('Service', {
+    return sequelize.define('ServiceType', {
         Id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -15,6 +15,6 @@ module.exports = function (sequelize, DataTypes) {
         }
 
     }, {
-        tableName: 'Service', modelName: 'Service', timestamps: false
+        tableName: 'ServiceType', modelName: 'ServiceType', timestamps: false
     });
 };

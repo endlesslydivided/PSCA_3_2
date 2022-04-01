@@ -27,7 +27,7 @@ function updatePulpit(request, response, body)
         } 
         else 
         {
-            response.end(JSON.stringify(result))
+            response.end(JSON.stringify(body))
         }
     })
     .catch(error => errorHandler(response, 500, error.message));
@@ -87,10 +87,13 @@ module.exports = function (request, response)
 
         case "DELETE": 
         {
-            Pulpit.destroy({where: {pulpit: request.url.split('/')[3]}})
-                .then(result => 
+            Pulpit.findByPk(request.url.split('/')[3])
+            .then(result => 
+            {
+                Pulpit.destroy({where: {pulpit: request.url.split('/')[3]}})
+                .then(resultD => 
                     {
-                    if (result == 0) 
+                    if (resultD == 0) 
                     {
                         throw new Error('Pulpit not found')
                     } 
@@ -101,6 +104,9 @@ module.exports = function (request, response)
                 })
                 .catch(error => errorHandler(response, 500, error.message));
 
+            })
+            .catch(error => errorHandler(response, 500, error.message));
+            
             break;
         }
         default:           
