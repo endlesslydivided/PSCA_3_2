@@ -6,7 +6,7 @@ const rs = fs.createReadStream("./files/file.txt");
 
 async function client() {
     try {
-        const res = await axios.get('http://localhost:4050/');
+        const res = await axios.get('http://localhost:3000/');
 
         ClientVerify(res.data, rs, (result) => 
         {
